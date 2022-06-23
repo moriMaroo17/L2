@@ -1,8 +1,7 @@
-package main
+package parseString
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -39,42 +38,4 @@ func parseString(stringForUnpack string) (string, error) {
 		}
 	}
 	return sb.String(), nil
-}
-
-func main() {
-	result, err := parseString("a4bc2d5e")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
-	result, err = parseString("abcd")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
-	// result, err = parseString("45")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(result)
-	result, err = parseString("")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
-	result, err = parseString(`qwe\4\5`)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
-	result, err = parseString(`qwe\45`)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
-	result, err = parseString(`qwe\\5`)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(result)
 }
