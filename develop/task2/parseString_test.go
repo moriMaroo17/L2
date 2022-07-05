@@ -1,4 +1,4 @@
-package parseString
+package parsestring
 
 import (
 	"testing"
