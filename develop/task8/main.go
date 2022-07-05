@@ -26,13 +26,13 @@ func main() {
 				os.Chdir(args[1])
 			}
 		default:
-			execute(args...)
+			execBash(command)
 		}
 	}
 }
 
-func execute(commandAndArgs ...string) {
-	command := exec.Command(commandAndArgs[0], commandAndArgs[1:]...)
+func execBash(commandAndArgs string) {
+	command := exec.Command("bash", "-c", commandAndArgs)
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	if err := command.Run(); err != nil {
