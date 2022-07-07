@@ -17,41 +17,46 @@ type Storage struct {
 }
 
 //NewStorage creates a new storage (constructor)
-func NewStorage(filename string) (*Storage, error) {
-	return &Storage{storage: make([]Event, 0), file: filename}, nil
+func NewStorage(filename string) *Storage {
+	return &Storage{
+		RWMutex: sync.RWMutex{},
+		storage: make([]Event, 0),
+		file:    filename,
+	}
 }
 
 // Delete event by key
-func (s *Storage) Delete(key int) error {
+func (s *Storage) Delete(m Event) error {
 	s.Lock()
 	defer s.Unlock()
 	defer s.write()
-	if key < len(s.storage) {
-		return fmt.Errorf("no such Storage key: %d", key)
+	if m.ID < len(s.storage) || s.storage[m.ID].UserID != m.UserID {
+		return fmt.Errorf("no such Storage key or wrong userId: %d", m.ID)
 	}
-	s.storage = append(s.storage[:key], s.storage[key+1:]...)
+	s.storage = append(s.storage[:m.ID], s.storage[m.ID+1:]...)
 	return nil
 }
 
 // Create a new event
-func (s *Storage) Create(m Event) {
+func (s *Storage) Create(m Event) int {
 	s.Lock()
 	defer s.Unlock()
 	defer s.write()
 	m.ID = len(s.storage)
 	s.storage = append(s.storage, m)
 	fmt.Printf("%v\n", s.storage)
+	return len(s.storage) - 1
 }
 
 // Update event by key
-func (s *Storage) Update(key int, m Event) error {
+func (s *Storage) Update(m Event) error {
 	s.Lock()
 	defer s.Unlock()
 	defer s.write()
-	if key < len(s.storage) {
-		return fmt.Errorf("no such Storage key: %d", key)
+	if m.ID < len(s.storage) || s.storage[m.ID].UserID != m.UserID {
+		return fmt.Errorf("no such Storage key or wrong userId: %d", m.ID)
 	}
-	s.storage[key] = m
+	s.storage[m.ID] = m
 	return nil
 }
 
