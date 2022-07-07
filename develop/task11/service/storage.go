@@ -30,7 +30,7 @@ func (s *Storage) Delete(m Event) error {
 	s.Lock()
 	defer s.Unlock()
 	defer s.write()
-	if m.ID < len(s.storage) || s.storage[m.ID].UserID != m.UserID {
+	if m.ID >= len(s.storage) || s.storage[m.ID].UserID != m.UserID {
 		return fmt.Errorf("no such Storage key or wrong userId: %d", m.ID)
 	}
 	s.storage = append(s.storage[:m.ID], s.storage[m.ID+1:]...)
@@ -44,7 +44,7 @@ func (s *Storage) Create(m Event) int {
 	defer s.write()
 	m.ID = len(s.storage)
 	s.storage = append(s.storage, m)
-	fmt.Printf("%v\n", s.storage)
+	fmt.Println(s.storage)
 	return len(s.storage) - 1
 }
 
@@ -53,7 +53,7 @@ func (s *Storage) Update(m Event) error {
 	s.Lock()
 	defer s.Unlock()
 	defer s.write()
-	if m.ID < len(s.storage) || s.storage[m.ID].UserID != m.UserID {
+	if m.ID >= len(s.storage) || s.storage[m.ID].UserID != m.UserID {
 		return fmt.Errorf("no such Storage key or wrong userId: %d", m.ID)
 	}
 	s.storage[m.ID] = m
