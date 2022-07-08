@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"time"
 
 	calendar "github.com/moriMaroo17/l2/develop/task11/service"
 )
@@ -17,26 +15,12 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.Form
 
 	userID := body.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
-
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	eventID := body.Get("event_id")
-	if eventID == "" {
-		response, _ := json.Marshal(`{"error": "specify event id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
-		return
-	}
-	eventIDasInt, err := strconv.Atoi(eventID)
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "event id must be an integer"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	eventIDasInt, ok := validateEventID(w, body.Get("event_id"))
+	if !ok {
 		return
 	}
 
@@ -44,14 +28,13 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		ID:     eventIDasInt,
 		UserID: userID,
 	}
-	if err = storage.Delete(e); err != nil {
+	if err := storage.Delete(e); err != nil {
 		response, _ := json.Marshal(fmt.Sprintf(`{"error": "%s"}`, err))
 		w.WriteHeader(400)
 		w.Write(response)
 		return
 	}
 	response, _ := json.Marshal(fmt.Sprintf(`{"result": "event with id %d was successfully deleted"}`, eventIDasInt))
-	// w.WriteHeader(200)
 	w.Write(response)
 
 }
@@ -61,18 +44,12 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.Form
 
 	userID := body.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02", body.Get("date"))
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "wrong date"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	date, ok := validateDate(w, body.Get("date"))
+	if !ok {
 		return
 	}
 
@@ -84,7 +61,6 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := storage.Create(e)
 	response, _ := json.Marshal(fmt.Sprintf(`{"result": "event with id %d was successfully created"}`, id))
-	// w.WriteHeader(200)
 	w.Write(response)
 }
 
@@ -93,33 +69,17 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.Form
 
 	userID := body.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02", body.Get("date"))
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "wrong date"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	date, ok := validateDate(w, body.Get("date"))
+	if !ok {
 		return
 	}
 
-	eventID := body.Get("event_id")
-	if eventID == "" {
-		response, _ := json.Marshal(`{"error": "specify event id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
-		return
-	}
-	eventIDasInt, err := strconv.Atoi(eventID)
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "event id must be an integer"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	eventIDasInt, ok := validateEventID(w, body.Get("event_id"))
+	if !ok {
 		return
 	}
 
@@ -130,14 +90,13 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		Description: body.Get("description"),
 	}
 
-	if err = storage.Update(e); err != nil {
+	if err := storage.Update(e); err != nil {
 		response, _ := json.Marshal(fmt.Sprintf(`{"error": "%s"}`, err))
 		w.WriteHeader(400)
 		w.Write(response)
 		return
 	}
 	response, _ := json.Marshal(fmt.Sprintf(`{"result": "event with id %d was successfully updated"}`, eventIDasInt))
-	// w.WriteHeader(200)
 	w.Write(response)
 }
 
@@ -145,18 +104,12 @@ func getByDayHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
 	userID := params.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02", params.Get("date"))
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "wrong date"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	date, ok := validateDate(w, params.Get("date"))
+	if !ok {
 		return
 	}
 
@@ -176,18 +129,12 @@ func getByWeekHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
 	userID := params.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02", params.Get("date"))
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "wrong date"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	date, ok := validateDate(w, params.Get("date"))
+	if !ok {
 		return
 	}
 
@@ -206,18 +153,12 @@ func getByMonthHandler(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
 	userID := params.Get("user_id")
-	if userID == "" {
-		response, _ := json.Marshal(`{"error": "specify user id"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	if !validateUserID(w, userID) {
 		return
 	}
 
-	date, err := time.Parse("2006-01-02", params.Get("date"))
-	if err != nil {
-		response, _ := json.Marshal(`{"error": "wrong date"}`)
-		w.WriteHeader(400)
-		w.Write(response)
+	date, ok := validateDate(w, params.Get("date"))
+	if !ok {
 		return
 	}
 
