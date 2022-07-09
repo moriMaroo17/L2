@@ -124,8 +124,8 @@ func getByDayHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := storage.GetEventsByDay(userID, date)
-
-	response, err := json.Marshal(fmt.Sprintf(`{"result": "%v"}`, result))
+	forReturn := formatResult(result)
+	response, err := json.Marshal(forReturn)
 	if err != nil {
 		response, _ := json.Marshal(`{"error": "internal server error"}`)
 		w.WriteHeader(500)
@@ -149,7 +149,8 @@ func getByWeekHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := storage.GetEventsByWeek(userID, date)
-	response, err := json.Marshal(fmt.Sprintf(`{"result": "%v"}`, result))
+	forReturn := formatResult(result)
+	response, err := json.Marshal(forReturn)
 	if err != nil {
 		response, _ := json.Marshal(`{"error": "internal server error"}`)
 		w.WriteHeader(500)
@@ -173,7 +174,9 @@ func getByMonthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := storage.GetEventsByMonth(userID, date)
-	response, err := json.Marshal(fmt.Sprintf(`{"result": "%v"}`, result))
+
+	forReturn := formatResult(result)
+	response, err := json.Marshal(forReturn)
 	if err != nil {
 		response, _ := json.Marshal(`{"error": "internal server error"}`)
 		w.WriteHeader(500)
