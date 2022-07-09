@@ -76,7 +76,6 @@ func (s *Storage) write() error {
 
 // Restore events from json file to storage
 func (s *Storage) Restore() error {
-	// byteArr := make([]byte, 0)
 	byteArr, err := ioutil.ReadFile(s.file)
 	if err != nil {
 		return err
