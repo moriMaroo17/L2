@@ -3,12 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 
 	calendar "github.com/moriMaroo17/l2/develop/task11/service"
 )
 
 var storage *calendar.Storage
+
+type configuration struct {
+	StorageFile string
+	Port        string
+}
+
+var config = configuration{}
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -173,8 +183,22 @@ func getByMonthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+func loadConfigFromFile(filename string) error {
+	byteArr, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(byteArr, &config); err != nil {
+		return err
+	}
+	return err
+}
+
 func main() {
-	storage = calendar.NewStorage("storage.json")
+	if err := loadConfigFromFile(os.Args[1]); err != nil {
+		log.Fatal(err)
+	}
+	storage = calendar.NewStorage(config.StorageFile)
 	storage.Restore()
 
 	r := http.NewServeMux()
@@ -188,5 +212,5 @@ func main() {
 	r.HandleFunc("/events_for_month", getByMonthHandler)
 
 	m := LoggingHandler(r)
-	http.ListenAndServe(":8080", m)
+	http.ListenAndServe(fmt.Sprintf(":%s", config.Port), m)
 }
